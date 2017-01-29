@@ -2,6 +2,7 @@ import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NameListService, ServiceWorkerService } from '../index';
 import { NavigationEnd, Router, ActivatedRoute, Params } from '@angular/router';
+import {UserAuthService} from '../global/user-auth.service';
 
 /**
  * This class represents the toolbar component which is the header of all UI pages.
@@ -20,11 +21,12 @@ export class ToolbarComponent implements OnInit {
   private cacheItems: Array<string> = [];
   private siteId: string;
 
-  constructor(private serviceWorkerService: ServiceWorkerService,
-              public nameListService: NameListService,
-              private route: ActivatedRoute,
-              private router: Router) {
-  }
+    constructor(private serviceWorkerService: ServiceWorkerService,
+                public nameListService: NameListService,
+                private route: ActivatedRoute,
+                private router: Router,
+                private userAuthService: UserAuthService) {
+    }
 
   ngOnInit() {
     this.setupSubscriptions();
@@ -41,6 +43,10 @@ export class ToolbarComponent implements OnInit {
 
   close() {
     this.onClose.emit( this.siteId !== null );
+  }
+
+  login() {
+      this.userAuthService.login();
   }
 
   hasFormChanged() {
