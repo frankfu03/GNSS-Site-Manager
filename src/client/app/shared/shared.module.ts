@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {DropdownModule, TooltipModule,} from 'ng2-bootstrap';
+import {Location, LocationStrategy, PathLocationStrategy} from '@angular/common';
 
 import {ToolbarComponent} from './toolbar/index';
 import {NavbarComponent} from './navbar/index';
@@ -31,7 +32,8 @@ export class SharedModule {
             ngModule: SharedModule,
             providers: [MiscUtils, NameListService, JsonixService, SiteLogService,
                 CorsSiteService, WFSService, ConstantsService, HttpUtilsService, JsonViewModelService,
-                UserAuthService]
+                UserAuthService,
+                Location, {provide: LocationStrategy, useClass: PathLocationStrategy}]
         };
     }
 }
