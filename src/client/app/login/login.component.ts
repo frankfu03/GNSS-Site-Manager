@@ -13,9 +13,6 @@ import {Router} from '@angular/router';
     template: '',
 })
 export class LoginComponent implements OnInit {
-    private username: string;
-    private password: string;
-
     constructor(private userAuthService: UserAuthService, private location: Location, private router: Router) {
         console.log('LoginComponent');
     }
@@ -25,9 +22,6 @@ export class LoginComponent implements OnInit {
     }
 
     login() {
-        console.log('username: ' + this.username);
-        console.log('password: ' + this.password);
-
         let locationHref: string = window.location.href;
         console.log('login - location: ', this.location.path());
         this.userAuthService.extractAuthDetails(locationHref);

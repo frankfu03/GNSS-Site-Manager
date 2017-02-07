@@ -4,6 +4,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {DropdownModule, TooltipModule,} from 'ng2-bootstrap';
 import {Location, LocationStrategy, PathLocationStrategy} from '@angular/common';
+import { OAuthModule } from 'angular-oauth2-oidc';
 
 import {ToolbarComponent} from './toolbar/index';
 import {NavbarComponent} from './navbar/index';
@@ -21,7 +22,8 @@ import {JsonViewModelService} from './json-data-view-model/index';
  */
 
 @NgModule({
-    imports: [CommonModule, RouterModule, DropdownModule, TooltipModule],
+    imports: [CommonModule, RouterModule, DropdownModule, TooltipModule,
+        OAuthModule.forRoot()],
     declarations: [ToolbarComponent, NavbarComponent],
     exports: [ToolbarComponent, NavbarComponent,
         CommonModule, FormsModule, ReactiveFormsModule, RouterModule],

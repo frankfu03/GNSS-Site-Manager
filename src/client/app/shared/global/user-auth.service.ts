@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {ConstantsService} from './constants.service';
+import {OAuthService} from 'angular-oauth2-oidc';
 
 /**
  * Service for authentication and authorisation of subjects.
@@ -116,24 +117,47 @@ export class UserAuthService {
     private idToken: IdToken;
 
     // , private location: Location - add when using redirectUrl (in '@angular/common')
-    constructor(private constantsService: ConstantsService) {
+    constructor(private constantsService: ConstantsService, private oAuthService: OAuthService) {
+        let provider: string = this.constantsService.getOpenAMServerURL() + '/oauth2/authorize';
+
+        // URL of the SPA to redirect the user to after login
+        this.oAuthService.redirectUri = 'http://localhost:5555/login';
+
+        // The SPA's id. The SPA is registerd with this id at the auth-server
+        this.oAuthService.clientId = 'GNSSSiteManager';
+
+        // set the scope for the permissions the client should request
+        // The first three are defined by OIDC. The 4th is a usecase-specific one
+        this.oAuthService.scope = 'openid profile';
+
+        // set to true, to receive also an id_token via OpenId Connect (OIDC) in addition to the OAuth2-based access_token
+        this.oAuthService.oidc = true;
+
+        // Use setStorage to use sessionStorage or another implementation of the TS-type Storage instead of localStorage
+        this.oAuthService.setStorage(sessionStorage);
+
+        // The name of the auth-server that has to be mentioned within the token
+        this.oAuthService.issuer = provider;
+
+        // Load Discovery Document and then try to login the user
+        this.oAuthService.loadDiscoveryDocument().then(() => {
+            // This method just tries to parse the token(s) within the url when the auth-server redirects the user back to the web-app
+            // It dosn't send the user the the login page
+            this.oAuthService.tryLogin({});
+        });
     }
 
     /**
      * @return users username or '' if none (ie. not logged in)
      */
     public getUserName(): string {
-        let name: string = '';
-        if (this.idToken) {
-            if (this.idToken.subject) {
-                name += this.idToken.subject;
-            }
-        }
-        return name;
+        let claims = this.oAuthService.getIdentityClaims();
+        if (!claims) return '';
+        return claims.given_name;
     }
 
-    getIDToken() {
-        return this.idToken;
+    getIDToken(): any {
+        return null;//  DELTET THIS METHOD this.idToken;
     }
 
     /**
@@ -143,25 +167,14 @@ export class UserAuthService {
         console.log('auth service login');
         // save so can return to here
 
-        let path: string = '/oauth2/authorize';
-        // This appRedirectUri as query param doesn't work (OpenAM's Agent's 'redirect url' must be exact)
-        // Instead try saving and retrieving from HTML 5's window.localStorage
-        // let appRedirectUri: string = 'appRedirect_uri='+this.location.path();;
-        let redirectUri: string = 'redirect_uri=http://localhost:5555/login';
-        let responseType: string = 'response_type=id_token';
-        let clientId: string = 'client_id=GNSSSiteManager';
-        let scope: string = 'scope=openid profile';
-        let nonce: string = 'nonce=1234';
-        let uri: string = this.constantsService.getOpenAMServerURL() + path
-            + '?' + redirectUri
-            + '&' + responseType
-            + '&' + clientId
-            + '&' + scope
-            + '&' + nonce;
-
         // redirect to the auth server
-        console.log('call auth server: ', uri);
-        window.location.href = uri;
+        console.log('call auth server: ', this.oAuthService.loginUrl);
+        this.oAuthService.initImplicitFlow();
+    }
+
+
+    public logoff() {
+        this.oAuthService.logOut();
     }
 
 
